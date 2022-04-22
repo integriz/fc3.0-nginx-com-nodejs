@@ -1,0 +1,44 @@
+version: "3.8"
+networks:
+  node-net:
+    name: node-net
+    driver: bridge
+services:
+  db:
+    build:
+      context: ./db
+    image: fullcycle/mysql
+    container_name: mysql
+    command: --innodb-use-native-aio=0
+    restart: always
+    tty: true
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3307:3306"
+    networks:
+      - node-net
+  nginx:
+      restart: always
+      build:
+        context: ./nginx
+      image: fullcycle/nginx
+      container_name: nginx
+      networks:
+        - node-net 
+      ports:
+          - "8080:80"
+  nodeserver:
+      build:
+          context: ./node
+      image: fullcycle/node
+      container_name: node
+      networks:
+        - node-net 
+      ports:
+          - "5000:5000"  
+      entrypoint: dockerize -wait tcp://db:3306 -timeout 240s node index.js
+ 

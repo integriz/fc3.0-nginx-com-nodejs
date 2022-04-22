@@ -1,0 +1,1 @@
+Executar o comando docker-compose up -d para subir a aplicação.
